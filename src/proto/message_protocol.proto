@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package ChatProtocol;
+
+message Pakcet {
+    enum PacketType {
+        // oneof enum값과 일치 시키기위한 temp enum값(proto3는 enum이 0부터시작)
+        TEMP1 = 0;
+        TEMP2 = 1;
+        LOGIN_REQUEST = 2;
+        LOGIN_REPLY = 3;
+        ROOM_CREATE_REQUEST = 4;
+        ROOM_CREATE_REPLY = 5;
+        SEND_CHAT_REQUEST = 6;
+        SEND_CHAT_REPLY = 7;
+        NOTI_RECV_CHAT = 8;
+        ROOM_EXIT_REQUEST = 9;
+        ROOM_EXIT_REPLY = 10;
+        SHOW_ROOM_LIST_REQUEST = 11;
+        SHOW_ROOM_LIST_REPLY = 12;
+    }
+    
+    PacketType type = 1;
+    oneof paket_msg {
+        LoginRequest login_request = 2;
+        LoginReply login_reply = 3;
+        RoomCreateRequest room_create_request = 4;
+        RoomCreateReply room_create_reply = 5;
+        SendChatRequest send_chat_request = 6;
+        SendChatReply send_chat_reply = 7;
+        NotiRecvChat noti_recv_chat = 8;
+        RoomExitRequest room_exit_request = 9;
+        RoomExitReply room_exit_reply = 10;
+        ShowRoomListRequest show_room_list_request = 11;
+        ShowRoomListReply show_room_list_reply = 12;
+    }
+}
+
+message ReplyError {
+    enum errorType {
+        ERROR_NONE = 0;
+        ERROR_EXIST = 1; // TODO : 에러 타입 다양하게
+    }
+    errorType errType = 1;
+}
+
+//LOGIN_REQUEST
+message LoginRequest {
+    string nickname = 1;
+}
+//LOGIN_REPLY
+message LoginReply {
+    ReplyError err = 1;
+    int32 ID = 2;
+}
+
+message RoomCreateRequest {
+
+}
+
+message RoomCreateReply {
+
+}
+
+message SendChatRequest {
+
+}
+
+message SendChatReply {
+
+}
+
+message NotiRecvChat {
+
+}
+
+message RoomExitRequest {
+
+}
+
+message RoomExitReply {
+
+}
+
+message ShowRoomListRequest {
+
+}
+
+message ShowRoomListReply {
+
+}
+
+
