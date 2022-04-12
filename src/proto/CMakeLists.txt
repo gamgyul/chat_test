@@ -1,0 +1,2 @@
+INCLUDE_DIRECTORIES(${Protobuf_INCLUDE_DIR})
+Protobuf_GENERATE_CPP(PROTO_SRC PROTO_HEADER message_protocol.proto)
