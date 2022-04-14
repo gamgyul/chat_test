@@ -15,5 +15,7 @@ int main(int argc, char** argv) {
 
     std::thread server_thread(&Server::Run, &chat_server);
 
+    server_thread.join();
+
     return 0;
 }

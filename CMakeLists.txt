@@ -1,13 +1,24 @@
 # Cmake Minimum requirement
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
+if(DEFINED ENV{CHAT_HOME})
+  
+else()
+message(FATAL_ERROR "Project Home Not setted")
+endif()
+
 SET(PROJ_HOME $ENV{CHAT_HOME})
 
-#set(CMAKE_C_COMPILER_ID "Clang")
-#set(CMAKE_C_COMPILER /usr/bin/clang)
-#set(CMAKE_CXX_COMPILER /usr/bin/clang++)
 
+PROJECT(TEST)
+
+# cflag
+
+set(CMAKE_C_COMPILER_ID "Clang")
+set(CMAKE_C_COMPILER /usr/bin/clang)
+set(CMAKE_CXX_COMPILER /usr/bin/clang++)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libstdc++")
+message(STATUS "${CMAKE_CXX_FLAGS}")
 
 # prohibit in-source-builds
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
