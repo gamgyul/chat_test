@@ -3,8 +3,11 @@
 
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <list>
 #include <thread>
+
+#include "proj_type.h"
 
 #endif // COMMON_H

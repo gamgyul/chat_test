@@ -35,3 +35,8 @@ Body를 serialize, deserialize 하는것과 같은 동작.
     * 구글 protocol buffer 적용해보기
 * 클라이언트 클래스 
 * 서버 클래스
+
+* proj.env 파일 python으로 변경해보기
+###LOG
+* Log 현재 사용하고 있는 temp cout 대신 boost log 적용해보기.
+* Log 큐 생성해서 log write 스레드 생성
