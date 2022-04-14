@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#define TEMP_LOG GetLogger().WriteLog(__FILE__, __LINE__)
+#define LOG_TEMP GetLogger().WriteLog(__FILE__, __LINE__)
 
 namespace server {
 

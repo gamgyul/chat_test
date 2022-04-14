@@ -2,8 +2,8 @@
 
 int main() {
     
-    TEMP_LOG << "test" << std::endl;
-    TEMP_LOG << "test2" << std::endl;
+    LOG_TEMP << "test" << std::endl;
+    LOG_TEMP << "test2" << std::endl;
 
     return 0;
 }

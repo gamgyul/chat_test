@@ -6,15 +6,17 @@
 #include <boost/bind.hpp>
 
 namespace Asio = boost::asio;
-
+using Tcp = boost::asio::ip::tcp;
 namespace server {
 
-class Acceptor{
+class Server{
 private:
-
+    Asio::io_context ioc_;
+    Tcp::acceptor acceptor_;
 public: 
-    Acceptor();
+    Server(const Tcp::endpoint& endpoint);
     
+    void Run();
     void StartServer();
     void StartAccept();
 };
