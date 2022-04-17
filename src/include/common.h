@@ -7,6 +7,8 @@
 #include <vector>
 #include <list>
 #include <thread>
+#include <memory>
+#include <functional>
 
 #include "proj_type.h"
 

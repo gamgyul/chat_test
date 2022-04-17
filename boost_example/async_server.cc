@@ -3,7 +3,6 @@
 #include <ctime>
 #include <memory>
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
 
 namespace IP = boost::asio::ip;
 namespace Asio = boost::asio;

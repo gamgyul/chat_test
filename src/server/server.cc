@@ -1,12 +1,18 @@
 
 #include "server.h"
 
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+
+#include "session.h"
 #include "logger.h"
+
 
 namespace server {
 
 Server::Server(const Tcp::endpoint &endpoint)
-    :ioc_(), acceptor_(ioc_, endpoint) {
+    :server_ioc_(), acceptor_(server_ioc_, endpoint),
+    accept_session_id_(0) {
 
     }
 
@@ -18,11 +24,44 @@ void Server::Run() {
 
     LOG_TEMP << "Server Run" << std::endl;
 
-    int a =0;
-    while(a ==0) {
-        sleep(5);
-    }
+    // int a =0; TODO delete while code
+    // while(a ==0) {
+    //     sleep(5);
+    // }   
 
+    StartAccept();
+
+    std::thread socket_thread(&Server::ReadThreadRun,this);
+    socket_thread.detach();
+    server_ioc_.run();
+    
+}
+
+void Server::ReadThreadRun() {
+    #ifndef _WIN32
+    pthread_setname_np(pthread_self(), "Read_thread");
+#endif
+    socket_ioc_.run();
+}
+
+void Server::StartAccept() {
+    acceptor_.async_accept(socket_ioc_,
+        [this](boost::system::error_code ec, Tcp::socket socket) {
+            if(!ec) {
+                while(session_map_.find(accept_session_id_) != session_map_.end())
+                    accept_session_id_++;
+                auto ret = session_map_.insert({accept_session_id_, std::make_shared<Session>(std::move(socket), this)});
+                if(!ret.second)
+                    LOG_TEMP << "session map error" << std::endl;
+                else
+                    LOG_TEMP << "Session " << accept_session_id_ << " accepted" << std::endl;
+            }
+            else {
+                LOG_TEMP << "accept error : " << ec.message() << std::endl;
+            }
+            StartAccept();
+        }
+    );
 }
 
 } //namespace server

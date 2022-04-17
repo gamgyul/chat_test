@@ -7,6 +7,7 @@ include_directories(${Boost_INCLUDE_DIR})
 SET (SERVER_SOURCE 
     logger.cc
     server.cc
+    session.cc
     server_main.cc
 )
 
