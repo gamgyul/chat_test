@@ -15,14 +15,17 @@ class Server;
 
 class Session : public std::enable_shared_from_this<Session> {
 private:
-    int a;
+    int session_id_;
+    std::array<char, kMaxBufferSize> buf_;
     Server *server_;
 
     Tcp::socket socket_;
 public:
-    Session(Tcp::socket socket, Server* server);
+    Session(Tcp::socket socket, Server* server, int session_id);
 
     void Start();
+    void ReadHeader();
+    void ReadBody(int bodylength);
 };
 
 } // namespace server

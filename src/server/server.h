@@ -22,9 +22,11 @@ private:
 
     std::map<int, std::shared_ptr<Session>> session_map_;
     int accept_session_id_;
-public: 
+
+    bool read_thread_start_;
+public:
     Server(const Tcp::endpoint& endpoint);
-    
+
     void Run();
     void ReadThreadRun();
     void StartServer();

@@ -41,7 +41,12 @@ void Server::ReadThreadRun() {
     #ifndef _WIN32
     pthread_setname_np(pthread_self(), "Read_thread");
 #endif
-    socket_ioc_.run();
+    while(true) {
+        socket_ioc_.run();
+        socket_ioc_.restart();
+        sleep(1);
+
+    }
 }
 
 void Server::StartAccept() {
@@ -50,11 +55,14 @@ void Server::StartAccept() {
             if(!ec) {
                 while(session_map_.find(accept_session_id_) != session_map_.end())
                     accept_session_id_++;
-                auto ret = session_map_.insert({accept_session_id_, std::make_shared<Session>(std::move(socket), this)});
+                std::shared_ptr<Session> new_session = std::make_shared<Session>(std::move(socket), this, accept_session_id_);
+                auto ret = session_map_.insert({accept_session_id_, new_session});
+
                 if(!ret.second)
                     LOG_TEMP << "session map error" << std::endl;
                 else
                     LOG_TEMP << "Session " << accept_session_id_ << " accepted" << std::endl;
+                new_session->Start();
             }
             else {
                 LOG_TEMP << "accept error : " << ec.message() << std::endl;

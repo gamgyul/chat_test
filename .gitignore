@@ -5,4 +5,6 @@ cmake_install.cmake
 .vscode/
 *.o
 *.out
-build/
+# build/
+# bin/
+# lib/

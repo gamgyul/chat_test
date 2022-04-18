@@ -15,4 +15,5 @@ add_executable(chat_server
     ${SERVER_SOURCE}
     )
 
-target_link_libraries(chat_server ${Boost_LIBRARIES} pthread)
+target_link_libraries(chat_server
+                      proto ${Boost_LIBRARIES} pthread ${Protobuf_LIBRARIES})
