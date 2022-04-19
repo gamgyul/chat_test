@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package ChatProtocol;
 
-message Pakcet {
+message Packet {
     enum PacketType {
         // oneof enum값과 일치 시키기위한 temp enum값(proto3는 enum이 0부터시작)
         TEMP1 = 0;
@@ -18,10 +18,11 @@ message Pakcet {
         ROOM_EXIT_REPLY = 10;
         SHOW_ROOM_LIST_REQUEST = 11;
         SHOW_ROOM_LIST_REPLY = 12;
+        PACKET_MAX = 13;
     }
     
     PacketType type = 1;
-    oneof paket_msg {
+    oneof packet_msg {
         LoginRequest login_request = 2;
         LoginReply login_reply = 3;
         RoomCreateRequest room_create_request = 4;

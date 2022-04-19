@@ -4,7 +4,8 @@
 #include "proto/message_protocol.pb.h"
 
 using MessageBase = google::protobuf::MessageLite;
-using MessagePtr = std::shared_ptr<MessageBase> ;
+using MessagePtr = std::shared_ptr<MessageBase>;
+using PacketPtr = std::shared_ptr<ChatProtocol::Packet>;
 
 static const int kMaxBufferSize = 65536;
 static const int kMsgHeaderSize = 4;

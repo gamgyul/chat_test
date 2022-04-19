@@ -5,7 +5,7 @@
 #include <boost/bind.hpp>
 
 #include "session.h"
-#include "logger.h"
+#include "common/logger.h"
 
 
 namespace server {

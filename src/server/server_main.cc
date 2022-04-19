@@ -3,11 +3,14 @@
 #include <thread>
 
 #include "server.h"
-#include "logger.h"
+#include "common/logger.h"
+#include "proto/message_protocol.pb.h"
 
 using namespace server;
 
 int main(int argc, char** argv) {
+
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     if(argc < 2) {   
         std::cout << "usage ./chat_server [port]" << std::endl;
