@@ -14,7 +14,16 @@ Server::Server(const Tcp::endpoint &endpoint)
     :server_ioc_(), acceptor_(server_ioc_, endpoint),
     accept_session_id_(0) {
 
+    dispatch_mgr_.Init(this);
+
+    for(int i = 0; i < kDispatcherSize; ++i) {
+        dispatch_thread_.push_back(std::thread(&Dispatcher::Run ,dispatch_mgr_.dispatcher()[i].get())); 
     }
+}
+
+Server::~Server() {
+
+}
 
 void Server::Run() {
 
@@ -23,11 +32,6 @@ void Server::Run() {
 #endif
 
     LOG_TEMP << "Server Run" << std::endl;
-
-    // int a =0; TODO delete while code
-    // while(a ==0) {
-    //     sleep(5);
-    // }   
 
     StartAccept();
 

@@ -7,6 +7,7 @@ include_directories(${Boost_INCLUDE_DIR})
 SET (SERVER_SOURCE 
     server.cc
     session.cc
+    dispatcher.cc
     server_main.cc
 )
 

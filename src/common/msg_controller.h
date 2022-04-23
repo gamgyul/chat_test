@@ -18,7 +18,7 @@ public:
     MessagePtr ReadMsg(PacketPtr msg);
 
     int SerializeMessage(PacketPtr msg);
-    
+
     int &header() {return header_;}
     std::array<char, kMaxBufferSize> &read_buf() { return read_buf_; }
     std::array<char, kMaxBufferSize> &write_buf() { return write_buf_; }

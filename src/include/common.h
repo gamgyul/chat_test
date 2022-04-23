@@ -6,9 +6,11 @@
 #include <string_view>
 #include <vector>
 #include <list>
+#include <queue>
 #include <thread>
 #include <memory>
 #include <functional>
+
 
 #include "proj_type.h"
 
