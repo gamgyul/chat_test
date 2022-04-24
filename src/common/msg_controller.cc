@@ -2,12 +2,6 @@
 
 namespace common {
 
-
-
-MessagePtr MsgController::ReadMsg(PacketPtr msg) {
-
-    
-}
 int MsgController::SerializeMessage(PacketPtr msg) {
     write_buf_.fill(0);
 

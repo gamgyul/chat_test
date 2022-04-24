@@ -14,12 +14,14 @@ private:
     common::MsgController msg_;
     std::thread *writer;
 
+    int session_id_;
+
     enum State {
         CONNECTED,
         LOGIN,
         ROOM
     };
-    
+    State state_;
 public:
     ChatClient(io_context &io_context, ip::tcp::resolver::results_type endpoints)
             : socket_(io_context) {
@@ -33,7 +35,7 @@ void Connect(const ip::tcp::resolver::results_type endpoints) {
           if (!ec)
           {
             std::cout << "connected" << std::endl;
-
+            state_ = CONNECTED;
             writer = new std::thread(&ChatClient::Write, this);
             ReadHeader();
           }
@@ -46,12 +48,13 @@ void Connect(const ip::tcp::resolver::results_type endpoints) {
 void ReadHeader() {
     //초기화
     msg_.read_buf().fill(0);
+    msg_.header() = 0;
     // async 함수 수행시 Session 객체가 살아있는것을 보장.
-    async_read(socket_, boost::asio::buffer(&msg_.header(), 4),
+    async_read(socket_, boost::asio::buffer(&msg_.header(), kMsgHeaderSize),
                 [this](boost::system::error_code ec, std::size_t length) {
         LOG_TEMP << "header length :" << length << ", " << msg_.header() << std::endl;
 
-        if(!ec) {
+        if(!ec && msg_.header() != 0) {
             ReadBody(msg_.header());
         }
         else {
@@ -63,9 +66,12 @@ void ReadHeader() {
 void ReadBody(int length) {
     
     async_read(socket_, boost::asio::buffer(msg_.read_buf(), length),
-                [this](boost::system::error_code ec, std::size_t test) {
+                [this](boost::system::error_code ec, std::size_t size) {
         if(!ec) {
-            LOG_TEMP << "body :" << std::string(msg_.read_buf().data()) << "length :" <<test << std::endl;
+            LOG_TEMP << "body :" << std::string(msg_.read_buf().data()) << "length :" <<size << std::endl;
+            PacketPtr p = std::make_shared<ChatProtocol::Packet>();
+            p->ParseFromArray(msg_.read_buf().data(), size);
+            HandleMsg(p);
             ReadHeader();
         }
         else {
@@ -74,10 +80,43 @@ void ReadBody(int length) {
     });
 }
 
+void HandleMsg(PacketPtr msg) {
+    ChatProtocol::Packet::PacketType type = msg->type();
+    switch(type) {
+        case ChatProtocol::Packet::LOGIN_REPLY : 
+        if(msg->has_login_reply()) {
+            HandleLoginReply(msg->login_reply());
+        }
+        ;
+        default : 
+        ;
+    }
+}
+void HandleLoginReply(const ChatProtocol::LoginReply &msg) {
+    if(msg.err() == ChatProtocol::ErrorType::ERROR_NONE) {
+        std::cout << "Login Success" <<std::endl;
+        session_id_ = msg.id();
+        state_ = LOGIN;
+    }
+
+
+}
 void Write() {
     // Write 테스트 중
-    
-    std::shared_ptr<ChatProtocol::Packet> p = std::make_shared<ChatProtocol::Packet>();
+    while(true) {
+        switch (state_) {
+            case CONNECTED :
+            DoLoginRequest();
+            ;
+            default :
+            ;
+        }
+    }
+
+}
+
+void DoLoginRequest() {
+        std::shared_ptr<ChatProtocol::Packet> p = std::make_shared<ChatProtocol::Packet>();
     char nickname[17] = {0, };
     LOG_TEMP << "Write test" << std::endl;
 
@@ -94,6 +133,7 @@ void Write() {
     async_write(socket_, boost::asio::buffer(msg_.write_buf(), len), 
                 [](boost::system::error_code ec, std::size_t) {});
 }
+
 };
 
 int main(int argc, char** argv) {

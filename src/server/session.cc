@@ -1,11 +1,14 @@
 #include "session.h"
 
 #include "common/logger.h"
+#include "server.h"
+#include "dispatcher.h"
 
 namespace server {
 
 Session::Session(Tcp::socket socket, Server* server, int session_id)
-        : socket_(std::move(socket)), server_(server), session_id_(session_id)
+        : socket_(std::move(socket)), server_(server), session_id_(session_id),
+          room_(-1)
     {
     }
 void Session::Start() {
@@ -36,10 +39,16 @@ void Session::ReadBody(int length) {
 
     auto self(shared_from_this());
     Asio::async_read(socket_, Asio::buffer(msg_.read_buf(), length),
-                [self](boost::system::error_code ec, std::size_t test) {
+                [self](boost::system::error_code ec, std::size_t size) {
         if(!ec) {
             LOG_TEMP << "body :" << std::string(self->msg_.read_buf().data()) 
-                     << " length :" <<test << std::endl;
+                     << " length :" <<size << std::endl;
+            PacketPtr p = std::make_shared<ChatProtocol::Packet>();
+            p->ParseFromArray(self->msg_.read_buf().data(), size);
+            if(self->room_ == -1) {
+                self->server_->dispatch_mgr().dispatcher()[0].get()->
+                            Enqueue(self->session_id_, std::static_pointer_cast<MessageBase>(p));
+            }
             self->ReadHeader();
         }
         else {
@@ -48,5 +57,10 @@ void Session::ReadBody(int length) {
     });
 }
 
+void Session::Write(PacketPtr msg) {
+    int len = msg_.SerializeMessage(msg);
+    LOG_TEMP << "Write() Session : " << session_id_ << ", len : " << len << std::endl;
+    boost::asio::write(socket_, boost::asio::buffer(msg_.write_buf(), len));
+}
 
 } // namespace server

@@ -8,6 +8,7 @@
 namespace server {
 
 class Server;
+class Session;
 
 class Dispatcher{
 private:
@@ -18,6 +19,7 @@ private:
     bool stop_flag_;
 
     Server* server_;
+    std::shared_ptr<Session> cur_sess_;
 public:
     Dispatcher(Server* server);
 
@@ -26,6 +28,7 @@ public:
 
     void HandleMsg(int session_id, PacketPtr msg);
     int HandleLoginRequest(int session_id, const ChatProtocol::LoginRequest &msg);
+    int WriteLoginReply(int session_id, ChatProtocol::ErrorType err);
 };
 
 class DispatcherMgr{

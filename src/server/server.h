@@ -40,6 +40,9 @@ public:
     void StartAccept();
 
     std::set<std::string> &nickname_map() {return nickname_map_;}
+    std::unordered_map<int, std::shared_ptr<Session>> &session_map() { return session_map_;};
+
+    DispatcherMgr &dispatch_mgr() {return dispatch_mgr_;};
 };
 } //namespace server
 

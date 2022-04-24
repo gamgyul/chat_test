@@ -15,7 +15,7 @@ private:
 
 public:
     // ChatProtocol::Pakcet::PacketType ReadHeader();
-    MessagePtr ReadMsg(PacketPtr msg);
+    // MessagePtr ReadMsg(PacketPtr msg);
 
     int SerializeMessage(PacketPtr msg);
 

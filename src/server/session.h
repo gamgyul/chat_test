@@ -22,13 +22,26 @@ private:
 
     Tcp::socket socket_;
     common::MsgController msg_;
-    
+
+    std::string nickname_;
+    int room_;
 public:
     Session(Tcp::socket socket, Server* server, int session_id);
 
     void Start();
     void ReadHeader();
     void ReadBody(int bodylength);
+
+    void Write(PacketPtr msg);
+
+    
+    /* setter */
+    void set_nickname(std::string &nickname) {nickname_ = nickname;}
+    
+    
+    /* getter */
+    common::MsgController &msg() { return msg_; };
+    std::string &nickname() { return nickname_; }
 };
 
 } // namespace server
