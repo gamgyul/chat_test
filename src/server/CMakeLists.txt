@@ -8,6 +8,7 @@ SET (SERVER_SOURCE
     server.cc
     session.cc
     dispatcher.cc
+    room.cc
     server_main.cc
 )
 

@@ -37,7 +37,7 @@ public:
     
     /* setter */
     void set_nickname(std::string &nickname) {nickname_ = nickname;}
-    
+    void set_room(int room) { room_ = room; }
     
     /* getter */
     common::MsgController &msg() { return msg_; };

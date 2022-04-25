@@ -41,8 +41,7 @@ void Session::ReadBody(int length) {
     Asio::async_read(socket_, Asio::buffer(msg_.read_buf(), length),
                 [self](boost::system::error_code ec, std::size_t size) {
         if(!ec) {
-            LOG_TEMP << "body :" << std::string(self->msg_.read_buf().data()) 
-                     << " length :" <<size << std::endl;
+            LOG_TEMP << "body : length :" <<size << std::endl;
             PacketPtr p = std::make_shared<ChatProtocol::Packet>();
             p->ParseFromArray(self->msg_.read_buf().data(), size);
             if(self->room_ == -1) {

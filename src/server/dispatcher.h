@@ -28,7 +28,12 @@ public:
 
     void HandleMsg(int session_id, PacketPtr msg);
     int HandleLoginRequest(int session_id, const ChatProtocol::LoginRequest &msg);
+    int HandleShowRoomListRequest(int session_id, const ChatProtocol::ShowRoomListRequest &msg);
+    int HandleRoomCreateRequest(int session_id, const ChatProtocol::RoomCreateRequest &msg);
     int WriteLoginReply(int session_id, ChatProtocol::ErrorType err);
+    int WriteShowRoomListReply(ChatProtocol::ErrorType err);
+    int WriteRoomCreateReply(int room_id, ChatProtocol::ErrorType err);
+
 };
 
 class DispatcherMgr{

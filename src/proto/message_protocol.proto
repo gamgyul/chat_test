@@ -14,8 +14,8 @@ message Packet {
         SEND_CHAT_REQUEST = 6;
         SEND_CHAT_REPLY = 7;
         NOTI_RECV_CHAT = 8;
-        ROOM_EXIT_REQUEST = 9;
-        ROOM_EXIT_REPLY = 10;
+        ROOM_JOIN_REQUEST = 9;
+        ROOM_JOIN_REPLY = 10;
         SHOW_ROOM_LIST_REQUEST = 11;
         SHOW_ROOM_LIST_REPLY = 12;
         PACKET_MAX = 13;
@@ -30,8 +30,8 @@ message Packet {
         SendChatRequest send_chat_request = 6;
         SendChatReply send_chat_reply = 7;
         NotiRecvChat noti_recv_chat = 8;
-        RoomExitRequest room_exit_request = 9;
-        RoomExitReply room_exit_reply = 10;
+        RoomJoinRequest room_Join_request = 9;
+        RoomJoinReply room_Join_reply = 10;
         ShowRoomListRequest show_room_list_request = 11;
         ShowRoomListReply show_room_list_reply = 12;
     }
@@ -54,11 +54,12 @@ message LoginReply {
 }
 
 message RoomCreateRequest {
-
+    string roomname = 1;
 }
 
 message RoomCreateReply {
-
+    ErrorType err = 1;
+    int32 room_number = 2;
 }
 
 message SendChatRequest {
@@ -66,19 +67,19 @@ message SendChatRequest {
 }
 
 message SendChatReply {
-
+    ErrorType err = 1;
 }
 
 message NotiRecvChat {
 
 }
 
-message RoomExitRequest {
+message RoomJoinRequest {
 
 }
 
-message RoomExitReply {
-
+message RoomJoinReply {
+    ErrorType err = 1;
 }
 
 message ShowRoomListRequest {
@@ -86,7 +87,12 @@ message ShowRoomListRequest {
 }
 
 message ShowRoomListReply {
-
+    ErrorType err = 1;
+    message RoomInfo {
+        int32 number = 1;
+        string name = 2;
+    }
+    repeated RoomInfo roomlist = 2;
 }
 
 

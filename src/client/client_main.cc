@@ -17,9 +17,11 @@ private:
     int session_id_;
 
     enum State {
+        WAIT,
         CONNECTED,
         LOGIN,
-        ROOM
+        ROOM,
+        ERROR
     };
     State state_;
 public:
@@ -84,10 +86,16 @@ void HandleMsg(PacketPtr msg) {
     ChatProtocol::Packet::PacketType type = msg->type();
     switch(type) {
         case ChatProtocol::Packet::LOGIN_REPLY : 
-        if(msg->has_login_reply()) {
-            HandleLoginReply(msg->login_reply());
-        }
-        ;
+            if(msg->has_login_reply()) {
+                HandleLoginReply(msg->login_reply());
+            }
+            break;
+        case ChatProtocol::Packet::SHOW_ROOM_LIST_REPLY :
+            HandleShowRoomListReply(msg->show_room_list_reply());
+            break;
+        case ChatProtocol::Packet::ROOM_CREATE_REPLY :
+            HandleRoomCreateReply(msg->room_create_reply());
+            break;
         default : 
         ;
     }
@@ -96,10 +104,42 @@ void HandleLoginReply(const ChatProtocol::LoginReply &msg) {
     if(msg.err() == ChatProtocol::ErrorType::ERROR_NONE) {
         std::cout << "Login Success" <<std::endl;
         session_id_ = msg.id();
+        DoShowRoomListRequest();
+    }
+    else {
+        std::cout << "Login Failed. error type :" <<static_cast<int>(msg.err()) <<std::endl;
+        state_ = ERROR;
+    }
+}
+
+void HandleShowRoomListReply(const ChatProtocol::ShowRoomListReply &msg) {
+    if(msg.err() == ChatProtocol::ErrorType::ERROR_NONE) {
+        std::cout << "############ room list ############" <<std::endl;
+        if(msg.roomlist_size() == 0) {
+            std::cout << "no room exist " << std::endl;
+        }
+        else {
+            for(int i = 0; i < msg.roomlist_size(); ++i) {
+                auto &room_info = msg.roomlist(i);
+                std::cout << room_info.number() << " : " << room_info.name() << std::endl;
+            }
+        }
+        std::cout << "###################################" <<std::endl;
         state_ = LOGIN;
     }
+    else {
+        state_ = ERROR;
+    }
+}
 
-
+void HandleRoomCreateReply(const ChatProtocol::RoomCreateReply &msg) {
+    if(msg.err() == ChatProtocol::ErrorType::ERROR_NONE) {
+        std::cout << "############ Joined Room " << msg.room_number() << "############" <<std::endl;
+        state_ = ROOM;
+    }
+    else {
+        state_ = ERROR;
+    }
 }
 void Write() {
     // Write 테스트 중
@@ -107,18 +147,28 @@ void Write() {
         switch (state_) {
             case CONNECTED :
             DoLoginRequest();
-            ;
+            break;
+            case WAIT :
+            std::cin.clear();
+            usleep(1000);
+            break;
+            case LOGIN :
+            std:: cout << "login state" << std::endl;
+            DoLoginStep();
+            break;
+            case ERROR :
+            exit(1);
+            break;
             default :
-            ;
+            break;
         }
     }
 
 }
 
 void DoLoginRequest() {
-        std::shared_ptr<ChatProtocol::Packet> p = std::make_shared<ChatProtocol::Packet>();
+    std::shared_ptr<ChatProtocol::Packet> p = std::make_shared<ChatProtocol::Packet>();
     char nickname[17] = {0, };
-    LOG_TEMP << "Write test" << std::endl;
 
     std::cout << "Login  nickname : ";
     std::cin.getline(nickname, 17);
@@ -130,8 +180,72 @@ void DoLoginRequest() {
 
     int len = msg_.SerializeMessage(p);
 
-    async_write(socket_, boost::asio::buffer(msg_.write_buf(), len), 
-                [](boost::system::error_code ec, std::size_t) {});
+    boost::asio::write(socket_, boost::asio::buffer(msg_.write_buf(), len));
+    state_ = WAIT;
+}
+
+void DoShowRoomListRequest() {
+    std::cout << "showroomListRequest" << std::endl;
+    std::shared_ptr<ChatProtocol::Packet> p = std::make_shared<ChatProtocol::Packet>();
+
+    p->set_type(ChatProtocol::Packet::SHOW_ROOM_LIST_REQUEST);
+    p->mutable_show_room_list_request();
+    int len = msg_.SerializeMessage(p);
+
+    boost::asio::write(socket_, boost::asio::buffer(msg_.write_buf(), len));
+
+    state_ = WAIT;
+
+}
+
+void DoLoginStep() {
+    std::cout << " 1. create room" << std::endl;
+    std::cout << " 2. join room" << std::endl;
+    bool flag = false;
+    int selected = 0;
+    while(!flag) {
+        std::cout << "select(use number) : " ;
+
+        std::cin >> selected;
+        if(selected == 1 || selected == 2) {
+            flag = true;
+        }
+        else {
+            std::cout << "wrong number" << std::endl;
+            std::cin.clear();
+            std::cin.ignore(10, '\n');
+        }
+    }
+    switch(selected) {
+        case 1 :
+        DoRoomCreateRequest();
+        break;
+        case 2 :
+        // DoRoomJoinRequest();
+        break;
+        default :
+        break;
+    }
+}
+void DoRoomCreateRequest() {
+    std::cout << "Create Room" << std::endl;
+    std::shared_ptr<ChatProtocol::Packet> p = std::make_shared<ChatProtocol::Packet>();
+
+    char roomName[17] = {0, };
+
+    std::cout << "Room Name : ";
+    std::cin.ignore(10, '\n');
+    std::cin.getline(roomName, 17);
+
+    p->set_type(ChatProtocol::Packet::ROOM_CREATE_REQUEST);
+    ChatProtocol::RoomCreateRequest *body =p->mutable_room_create_request();
+    body->set_roomname(roomName);
+    int len = msg_.SerializeMessage(p);
+
+    boost::asio::write(socket_, boost::asio::buffer(msg_.write_buf(), len));
+
+    state_ = WAIT;
+
 }
 
 };

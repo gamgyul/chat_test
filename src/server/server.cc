@@ -5,6 +5,7 @@
 #include <boost/bind.hpp>
 
 #include "session.h"
+#include "room.h"
 #include "common/logger.h"
 
 
@@ -12,7 +13,7 @@ namespace server {
 
 Server::Server(const Tcp::endpoint &endpoint)
     :server_ioc_(), acceptor_(server_ioc_, endpoint),
-    accept_session_id_(0) {
+    accept_session_id_(0), room_index_(0) {
 
     dispatch_mgr_.Init(this);
 
@@ -76,4 +77,11 @@ void Server::StartAccept() {
     );
 }
 
+int Server::CreateRoom(const std::string &room_name) {
+    std::shared_ptr<Room> p = std::make_shared<Room>();
+    p->name() = room_name;
+    room_map_.insert({room_index_, p});
+
+    return room_index_++;
+}
 } //namespace server

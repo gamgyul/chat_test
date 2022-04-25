@@ -13,7 +13,7 @@ using Tcp = boost::asio::ip::tcp;
 
 namespace server {
 class Session;
-
+class Room;
 
 class Server{
 private:
@@ -27,7 +27,8 @@ private:
     int accept_session_id_;
 
     std::set<std::string> nickname_map_;
-
+    std::map<int, std::shared_ptr<Room>> room_map_;
+    int room_index_;
     std::vector<std::thread> dispatch_thread_;
     DispatcherMgr dispatch_mgr_;
 public:
@@ -39,8 +40,11 @@ public:
     void StartServer();
     void StartAccept();
 
+    int CreateRoom(const std::string &room_name);
+
     std::set<std::string> &nickname_map() {return nickname_map_;}
     std::unordered_map<int, std::shared_ptr<Session>> &session_map() { return session_map_;};
+    std::map<int, std::shared_ptr<Room>> &room_map() { return room_map_; };
 
     DispatcherMgr &dispatch_mgr() {return dispatch_mgr_;};
 };
