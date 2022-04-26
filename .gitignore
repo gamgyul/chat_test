@@ -1,3 +1,10 @@
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
 .vscode/
 *.o
 *.out
+# build/
+# bin/
+# lib/
