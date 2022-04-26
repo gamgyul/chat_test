@@ -1,7 +1,16 @@
 #ifndef PROJ_TYPE_H_
 #define PROJ_TYPE_H_
 
-#include "proto/message_protocol.pb.h"
+// #include "proto/message_protocol.pb.h"
+namespace google {
+namespace protobuf {
+    class MessageLite;
+}
+}
+class MessageLite;
+namespace ChatProtocol{
+class Packet;
+}
 
 using MessageBase = google::protobuf::MessageLite;
 using MessagePtr = std::shared_ptr<MessageBase>;

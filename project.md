@@ -34,11 +34,7 @@ boost asio를 이용한 간단한 채팅 프로그램 개발
 
 
 
-<!-- ### Message
-헤더 및 Body에 대한 Read Write을 하는 기능을 하는 클래스를 만들려고 함.
-### MsgReadWriter
-가져온 메세지의 프로토콜에 따라 동작을 수행하는 클래스
-Body를 serialize, deserialize 하는것과 같은 동작. -->
+
 
 ## TODO
 * 메세지 클래스

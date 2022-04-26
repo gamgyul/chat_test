@@ -63,7 +63,7 @@ message RoomCreateReply {
 }
 
 message SendChatRequest {
-
+    string chat = 1 ;
 }
 
 message SendChatReply {
@@ -71,15 +71,17 @@ message SendChatReply {
 }
 
 message NotiRecvChat {
-
+    string nickname = 1;
+    string chat = 2;
 }
 
 message RoomJoinRequest {
-
+    int32 room_number = 1;
 }
 
 message RoomJoinReply {
     ErrorType err = 1;
+    int32 room_number = 2;
 }
 
 message ShowRoomListRequest {

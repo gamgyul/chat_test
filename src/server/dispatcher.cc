@@ -71,6 +71,16 @@ void Dispatcher::HandleMsg(int session_id, PacketPtr msg) {
                 HandleRoomCreateRequest(session_id, msg->room_create_request());
             }
             break;
+        case Packet::SEND_CHAT_REQUEST : 
+            if(msg->has_send_chat_request()) {
+                HandleSendChatRequest(session_id, msg->send_chat_request());
+            }
+            break;
+        case Packet::ROOM_JOIN_REQUEST :
+            if(msg->has_room_join_request()) {
+                HandleRoomJoinRequest(session_id, msg->room_join_request());
+            }
+            break;
         default : 
             LOG_TEMP << "Invalid Packet Type!!" << std::endl;
             break;
@@ -111,6 +121,32 @@ int Dispatcher::HandleRoomCreateRequest(int session_id, const ChatProtocol::Room
     server_->room_map()[room]->JoinSession(session);
     WriteRoomCreateReply(room, ERROR_NONE);
 
+    return 0;
+}
+
+int Dispatcher::HandleSendChatRequest(int session_id, const ChatProtocol::SendChatRequest &msg) {
+    LOG_TEMP << "SEND_CHAT_REQUEST" << std::endl;
+
+    auto session = server_->session_map()[session_id];
+    auto room = server_->room_map()[session->room()];
+
+    room->BroadCastMessage(session->nickname(), msg.chat());
+    return 0;
+}
+
+int Dispatcher::HandleRoomJoinRequest(int session_id, const ChatProtocol::RoomJoinRequest &msg) {
+    LOG_TEMP <<"ROOM_JOIN_REQUEST" << std::endl;
+
+    auto session = server_->session_map()[session_id];
+    int room = msg.room_number();
+    if(server_->room_map().find(room) != server_->room_map().end()) {
+        session->set_room(room);
+        server_->room_map()[room]->JoinSession(session);
+        WriteRoomJoinReply(room, ERROR_NONE);
+    }
+    else {
+        WriteRoomJoinReply(room, ERROR_EXIST);
+    }
     return 0;
 }
 
@@ -155,6 +191,19 @@ int Dispatcher::WriteRoomCreateReply(int room_id, ChatProtocol::ErrorType err) {
         body->set_room_number(room_id);
     }
 
+    cur_sess_->Write(p);
+    return 0;
+}
+
+int Dispatcher::WriteRoomJoinReply(int room_id, ChatProtocol::ErrorType err) {
+    std::shared_ptr<Packet> p = std::make_shared<Packet>();
+    p->set_type(Packet::ROOM_JOIN_REPLY);
+    RoomJoinReply*body =p->mutable_room_join_reply();
+
+    body->set_err(err);
+    if(err == ERROR_NONE) {
+        body->set_room_number(room_id);
+    }
     cur_sess_->Write(p);
     return 0;
 }

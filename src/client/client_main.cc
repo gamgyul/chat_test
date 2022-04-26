@@ -54,7 +54,7 @@ void ReadHeader() {
     // async 함수 수행시 Session 객체가 살아있는것을 보장.
     async_read(socket_, boost::asio::buffer(&msg_.header(), kMsgHeaderSize),
                 [this](boost::system::error_code ec, std::size_t length) {
-        LOG_TEMP << "header length :" << length << ", " << msg_.header() << std::endl;
+        // LOG_TEMP << "header length :" << length << ", " << msg_.header() << std::endl;
 
         if(!ec && msg_.header() != 0) {
             ReadBody(msg_.header());
@@ -70,7 +70,7 @@ void ReadBody(int length) {
     async_read(socket_, boost::asio::buffer(msg_.read_buf(), length),
                 [this](boost::system::error_code ec, std::size_t size) {
         if(!ec) {
-            LOG_TEMP << "body :" << std::string(msg_.read_buf().data()) << "length :" <<size << std::endl;
+            // LOG_TEMP << "body :" << std::string(msg_.read_buf().data()) << "length :" <<size << std::endl;
             PacketPtr p = std::make_shared<ChatProtocol::Packet>();
             p->ParseFromArray(msg_.read_buf().data(), size);
             HandleMsg(p);
@@ -96,7 +96,14 @@ void HandleMsg(PacketPtr msg) {
         case ChatProtocol::Packet::ROOM_CREATE_REPLY :
             HandleRoomCreateReply(msg->room_create_reply());
             break;
+        case ChatProtocol::Packet::ROOM_JOIN_REPLY : 
+            HandleRoomJoinReply(msg->room_join_reply());
+            break;
+        case ChatProtocol::Packet::NOTI_RECV_CHAT :
+            HandleNotiRecvChat(msg->noti_recv_chat());
+            break;
         default : 
+            std::cout << " invalid type :" << type << std::endl; 
         ;
     }
 }
@@ -138,9 +145,25 @@ void HandleRoomCreateReply(const ChatProtocol::RoomCreateReply &msg) {
         state_ = ROOM;
     }
     else {
-        state_ = ERROR;
+        state_ = LOGIN;
     }
 }
+
+void HandleRoomJoinReply(const ChatProtocol::RoomJoinReply &msg) {
+    if(msg.err() == ChatProtocol::ErrorType::ERROR_NONE) {
+    std::cout << "############ Joined Room " << msg.room_number() << "############" <<std::endl;
+        state_ = ROOM;
+    }
+    else {
+        std::cout << "Room Join Failed !" << std::endl;
+        state_ = LOGIN;
+    }
+}
+
+void HandleNotiRecvChat(const ChatProtocol::NotiRecvChat &msg) {
+    std::cout << msg.nickname() <<" : " << msg.chat() << std::endl;
+}
+
 void Write() {
     // Write 테스트 중
     while(true) {
@@ -153,8 +176,10 @@ void Write() {
             usleep(1000);
             break;
             case LOGIN :
-            std:: cout << "login state" << std::endl;
             DoLoginStep();
+            break;
+            case ROOM :
+            DoChat();
             break;
             case ERROR :
             exit(1);
@@ -209,6 +234,7 @@ void DoLoginStep() {
         std::cin >> selected;
         if(selected == 1 || selected == 2) {
             flag = true;
+            std::cin.ignore(10, '\n');
         }
         else {
             std::cout << "wrong number" << std::endl;
@@ -221,7 +247,7 @@ void DoLoginStep() {
         DoRoomCreateRequest();
         break;
         case 2 :
-        // DoRoomJoinRequest();
+        DoRoomJoinRequest();
         break;
         default :
         break;
@@ -234,8 +260,9 @@ void DoRoomCreateRequest() {
     char roomName[17] = {0, };
 
     std::cout << "Room Name : ";
-    std::cin.ignore(10, '\n');
+    
     std::cin.getline(roomName, 17);
+    // std::cin.ignore(10, '\n');
 
     p->set_type(ChatProtocol::Packet::ROOM_CREATE_REQUEST);
     ChatProtocol::RoomCreateRequest *body =p->mutable_room_create_request();
@@ -248,6 +275,52 @@ void DoRoomCreateRequest() {
 
 }
 
+void DoRoomJoinRequest() {
+    std::cout << "Join Room" << std::endl;
+    std::shared_ptr<ChatProtocol::Packet> p = std::make_shared<ChatProtocol::Packet>();
+
+    std::cout << "Room Number : ";
+    int selected = -1;
+    bool flag;
+    while(!flag) {
+        std::cout << "select(use number) : " ;
+
+        std::cin >> selected;
+
+        if(std::cin.fail()) {
+            std::cout << "wrong number" << std::endl;
+            std::cin.ignore(10, '\n');
+            std::cin.clear();
+        }
+        else {
+            flag = true;
+            std::cin.ignore(10, '\n');
+        };
+    }
+    p->set_type(ChatProtocol::Packet::ROOM_JOIN_REQUEST);
+    ChatProtocol::RoomJoinRequest *body =p->mutable_room_join_request();
+    body->set_room_number(selected);
+    int len = msg_.SerializeMessage(p);    
+    boost::asio::write(socket_, boost::asio::buffer(msg_.write_buf(), len));
+
+    state_ = WAIT;
+}
+
+void DoChat() {
+    std::shared_ptr<ChatProtocol::Packet> p = std::make_shared<ChatProtocol::Packet>();
+    char chatmsg[256] = {0, };
+    // std::cout << "Chat : ";
+    std::cin.getline(chatmsg, 256);
+
+    p->set_type(ChatProtocol::Packet::SEND_CHAT_REQUEST);
+    ChatProtocol::SendChatRequest *body =p->mutable_send_chat_request();
+
+    body->set_chat(chatmsg);
+
+    int len = msg_.SerializeMessage(p);
+
+    boost::asio::write(socket_, boost::asio::buffer(msg_.write_buf(), len));
+}
 };
 
 int main(int argc, char** argv) {

@@ -5,6 +5,8 @@
 
 #include <condition_variable>
 
+#include "proto/message_protocol.pb.h"
+
 namespace server {
 
 class Server;
@@ -30,9 +32,12 @@ public:
     int HandleLoginRequest(int session_id, const ChatProtocol::LoginRequest &msg);
     int HandleShowRoomListRequest(int session_id, const ChatProtocol::ShowRoomListRequest &msg);
     int HandleRoomCreateRequest(int session_id, const ChatProtocol::RoomCreateRequest &msg);
+    int HandleSendChatRequest(int session_id, const ChatProtocol::SendChatRequest &msg);
+    int HandleRoomJoinRequest(int session_id, const ChatProtocol::RoomJoinRequest &msg);
     int WriteLoginReply(int session_id, ChatProtocol::ErrorType err);
     int WriteShowRoomListReply(ChatProtocol::ErrorType err);
     int WriteRoomCreateReply(int room_id, ChatProtocol::ErrorType err);
+    int WriteRoomJoinReply(int room_id, ChatProtocol::ErrorType err);
 
 };
 

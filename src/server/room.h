@@ -17,7 +17,7 @@ public:
     Room();
     
     void JoinSession(std::shared_ptr<Session> session);
-    int BroadCastMessage() {}
+    int BroadCastMessage(std::string &nickname, const std::string &chat);
 
     /* getter */
     std::string &name() { return name_; }

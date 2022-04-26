@@ -44,8 +44,13 @@ void Session::ReadBody(int length) {
             LOG_TEMP << "body : length :" <<size << std::endl;
             PacketPtr p = std::make_shared<ChatProtocol::Packet>();
             p->ParseFromArray(self->msg_.read_buf().data(), size);
-            if(self->room_ == -1) {
+            int room_number = self->room_;
+            if(room_number == -1) {
                 self->server_->dispatch_mgr().dispatcher()[0].get()->
+                            Enqueue(self->session_id_, std::static_pointer_cast<MessageBase>(p));
+            }
+            else {
+                self->server_->dispatch_mgr().dispatcher()[room_number % (kDispatcherSize - 1) + 1].get()->
                             Enqueue(self->session_id_, std::static_pointer_cast<MessageBase>(p));
             }
             self->ReadHeader();

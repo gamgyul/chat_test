@@ -42,6 +42,7 @@ public:
     /* getter */
     common::MsgController &msg() { return msg_; };
     std::string &nickname() { return nickname_; }
+    int room() { return room_; }
 };
 
 } // namespace server
