@@ -31,6 +31,7 @@ void Session::ReadHeader() {
         }
         else {
             LOG_TEMP << "header read error :" << ec.message() << std::endl;
+            self->server_->CloseSession(self);
         }
     });
 }

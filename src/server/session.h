@@ -36,10 +36,12 @@ public:
 
     
     /* setter */
+    void set_sesion_id(int session_id) {session_id_ = session_id;}
     void set_nickname(std::string &nickname) {nickname_ = nickname;}
     void set_room(int room) { room_ = room; }
     
     /* getter */
+    int session_id() {return session_id_;}
     common::MsgController &msg() { return msg_; };
     std::string &nickname() { return nickname_; }
     int room() { return room_; }

@@ -84,4 +84,30 @@ int Server::CreateRoom(const std::string &room_name) {
 
     return room_index_++;
 }
+
+int Server::CloseSession(std::shared_ptr<Session> session) {
+    LOG_TEMP << "CloseSession : " << session << std::endl;
+    if (session->room() > -1 ) {
+        auto it = room_map_.find(session->room());
+        if(it == room_map_.end()) {
+            LOG_TEMP << "Can't Find Room" << std::endl;
+            return -1;
+        }
+        auto room = it->second;
+        if(room->ExitSession(session) == 0) {
+            room_map_.erase(it);
+        }
+    }
+
+    auto it = session_map_.find(session->session_id());
+    if(it == session_map_.end()) {
+        LOG_TEMP << "Invalid Session" << std::endl;
+        return -1;
+    }
+    session_map_.erase(it);
+    LOG_TEMP << "Session Closed" << std::endl;
+
+    return 0;
+}
+
 } //namespace server

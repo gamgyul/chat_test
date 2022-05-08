@@ -41,7 +41,7 @@ public:
     void StartAccept();
 
     int CreateRoom(const std::string &room_name);
-
+    int CloseSession(std::shared_ptr<Session> session);
     std::set<std::string> &nickname_map() {return nickname_map_;}
     std::unordered_map<int, std::shared_ptr<Session>> &session_map() { return session_map_;};
     std::map<int, std::shared_ptr<Room>> &room_map() { return room_map_; };

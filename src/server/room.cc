@@ -5,11 +5,26 @@
 #include "proto/message_protocol.pb.h"
 #include "common/logger.h"
 namespace server {
-Room::Room() : participant_(0) {
+Room::Room() : participant_(0), count_(0) {
 
 }
-void Room::JoinSession(std::shared_ptr<Session> session) {
-    session_list_.push_back(session);
+int Room::JoinSession(std::shared_ptr<Session> session) {
+    if(session_map_.find(session) == session_map_.end()) {
+        session_map_.insert(session);
+        count_++;
+    }
+
+    return count_;
+}
+
+int Room::ExitSession(std::shared_ptr<Session> session) {
+    auto it = session_map_.find(session);
+    if(it != session_map_.end()) {
+        session_map_.erase(it);
+        count_--;
+    }
+
+    return count_;
 }
 
 int Room::BroadCastMessage(std::string &nickname, const std::string &chat) {
@@ -21,10 +36,12 @@ int Room::BroadCastMessage(std::string &nickname, const std::string &chat) {
     body->set_nickname(nickname);
     body->set_chat(chat);
 
-    for(auto &session : session_list_) {
+    for(auto &session : session_map_) {
         session->Write(p);
     }
 
     return 0;
 }
+
+
 }  //namespace server
